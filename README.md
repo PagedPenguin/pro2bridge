@@ -1,15 +1,10 @@
 # Nintendo Switch Pro 2 Controller USB Bridge
 
-A high-performance USB HID bridge specifically designed for the **Nintendo Switch Pro 2 Controller**, enabling it to work on PC, older Switch consoles, and other devices. Built on the RP2350 microcontroller with low latency.
+A USB HID bridge specifically designed for the **Nintendo Switch Pro 2 Controller**, enabling it to work on the **Nintendo Switch 1**. Built on the RP2350 microcontroller with low latency.
 
 ## Features
 
-- ✅ **Pro 2 Controller Support**: Full support for Nintendo Switch Pro 2 (Report 0x05)
-- ✅ **Complete Button Mapping**: All buttons including GL/GR, headset button, and D-pad
-- ✅ **12-bit Analog Sticks**: Preserves full stick precision (scaled to 8-bit output)
-- ✅ **Battery Monitoring**: Reads and displays battery voltage (debug mode)
-- ✅ **Low Latency**: ~6-12ms average latency (competitive gaming ready)
-- ✅ **Universal Output**: Appears as licensed HORIPAD S controller (works on PC/Switch 1)
+- ✅ **Pro 2 Controller Support**: Support for Nintendo Switch Pro 2 (Report 0x05) **_(Probably)_**
 - ✅ **Dual-Core Architecture**: Core0 handles output, Core1 handles input
 - ✅ **Auto-Detection**: Also supports original Pro Controller and generic gamepads
 - ✅ **Debug Mode**: Optional serial output with button name parsing and LED feedback
@@ -51,14 +46,13 @@ Optional: WS2812B LED → GPIO 16 (debug indicator)
    cd pro2-2-ns1
    ```
 
-2. **Open in PlatformIO**
+2. **Open in VScode**
    - Open the project folder in VSCode with PlatformIO extension
    - PlatformIO will automatically install dependencies
 
 3. **Build and Upload**
-   ```bash
-   pio run --target upload
-   ```
+   - In the PlatformIO extention tab click build
+
 
 ## Configuration
 
@@ -86,22 +80,11 @@ Edit `src/main.cpp` to enable/disable debug features:
 ### Supported Controllers
 
 **Primary Target:**
-- **Nintendo Switch Pro 2 Controller** (Report 0x05) - Full support with all buttons
+- **Nintendo Switch Pro 2 Controller** (Report 0x05)
 
 **Also Compatible:**
 - Nintendo Switch Pro Controller (Report 0x30)
 - Generic USB Gamepads (standard HID format)
-
-### Pro 2 Controller Features
-
-The bridge fully supports all Pro 2 controller features:
-- **Standard Buttons**: Y, X, B, A, L, R, ZL, ZR, Plus, Minus
-- **Stick Buttons**: L-Stick, R-Stick
-- **System Buttons**: Home, Capture
-- **Special Buttons**: C button, GL/GR buttons, Headset button
-- **D-Pad**: 8-direction + center detection
-- **Analog Sticks**: Left and Right with 12-bit precision
-- **Battery Info**: Voltage monitoring (debug mode)
 
 ## Performance
 
@@ -141,22 +124,6 @@ pro2-2-ns1/
 3. **Translation**: Maps Pro 2's 32-bit button layout to standard 16-bit format
 4. **Stick Conversion**: Scales 12-bit analog values (0-4095) to 8-bit (0-255)
 5. **Output**: Sends as HORIPAD S gamepad via native USB (Core0)
-
-### Pro 2 Button Mapping
-
-The bridge translates Pro 2's unique button layout:
-
-| Pro 2 Button | Output Position | Notes |
-|--------------|----------------|-------|
-| Y, X, B, A | Standard face buttons | Direct mapping |
-| L, R, ZL, ZR | Shoulder buttons | Direct mapping |
-| Plus, Minus | System buttons | Direct mapping |
-| Home, Capture | System buttons | Direct mapping |
-| L-Stick, R-Stick | Stick press | Direct mapping |
-| GL, GR | Extra buttons | Mapped to button 12/13 |
-| C Button | Extra button | Mapped to button 14 |
-| Headset | Extra button | Mapped to button 15 |
-| D-Pad | Hat switch | 8-direction detection |
 
 ### Architecture
 
