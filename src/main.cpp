@@ -5,6 +5,7 @@
 #include <pico/multicore.h>
 #include "hid_report_parser.h"
 #include "switch_controller_output.h"
+#include "pro2_handshake.h"
 
 // Debug output disabled (production mode - low latency)
 #define DEBUG_SERIAL 0
@@ -40,6 +41,9 @@ void core1_main() {
 void setup() {
   // CRITICAL: Initialize USB device FIRST before anything else
   initSwitchOutput();
+  
+  // Initialize Pro 2 handshake system
+  initPro2Handshake();
   
   // Wait for USB enumeration to complete
   delay(1000);
@@ -121,9 +125,27 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance,
 #if DEBUG_SERIAL
   Serial.printf("HID device mounted: addr=%u, inst=%u, report_len=%u\n",
                 dev_addr, instance, desc_len);
+  
+  // Check if it's a Nintendo controller
+  uint16_t vid, pid;
+  if (tuh_vid_pid_get(dev_addr, &vid, &pid)) {
+    Serial.printf("  VID:0x%04X PID:0x%04X\n", vid, pid);
+    if (vid == 0x057E) {
+      Serial.println("  Nintendo controller detected!");
+      if (pid == 0x2069) {
+        Serial.println("  -> Pro 2 Controller - sending handshake...");
+      }
+    }
+  }
 #endif
   (void)desc_report;
   (void)desc_len;
+  
+  // Send Pro 2 handshake if needed
+  sendPro2Handshake(dev_addr, instance);
+  
+  // Small delay to let handshake process
+  delay(100);
 
   if (!tuh_hid_receive_report(dev_addr, instance)) {
 #if DEBUG_SERIAL
@@ -136,8 +158,11 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
 #if DEBUG_SERIAL
   Serial.printf("HID device unmounted: addr=%u, inst=%u\n", dev_addr, instance);
 #endif
+  
+  // Reset handshake state for this device
+  resetPro2Handshake(instance);
+  
   (void)dev_addr;
-  (void)instance;
 }
 
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
