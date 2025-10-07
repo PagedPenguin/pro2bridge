@@ -4,7 +4,7 @@
 #include "pio_usb.h"
 #include <pico/multicore.h>
 #include "hid_report_parser.h"
-#include "pro_controller_output.h"
+#include "switch_controller_output.h"
 
 // Debug output disabled (production mode - low latency)
 #define DEBUG_SERIAL 0
@@ -15,9 +15,6 @@
 #define BLINK_MS 50
 
 Adafruit_NeoPixel strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
-
-// Pro Controller Output (on native USB)
-ProControllerOutput proController;
 
 // Store previous report to filter duplicates (support up to 64 byte reports)
 static uint8_t prev_report[4][64] = {0};  // Support up to 4 HID instances
@@ -58,13 +55,12 @@ void setup() {
   Serial.println("GPIO 12/13: Waiting for input controller...\n");
 #endif
   
-  // Initialize Pro Controller output on native USB
-  proController.begin();
+  // Initialize Switch gamepad output on native USB
+  initSwitchOutput();
   
   delay(2000);  // Wait for USB enumeration
   
-  // Send initial report to register the gamepad
-  proController.sendReport();
+  // Initial report already sent by initSwitchOutput()
 
 #if DEBUG_SERIAL
   Serial.println("Gamepad initialized. Waiting for input...");
@@ -82,7 +78,7 @@ void loop() {
   // Send periodic report to keep gamepad active
   static uint32_t last_report = 0;
   if (millis() - last_report >= 100) {  // Every 100ms
-    proController.sendReport();
+    sendSwitchReport();
     last_report = millis();
   }
   
@@ -200,7 +196,7 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
 #endif
 
   // Forward input HID report to output gamepad (ALWAYS)
-  forwardHIDReport(report, len, &proController);
+  forwardHIDReport(report, len);
 
   // Request next report
   if (!tuh_hid_receive_report(dev_addr, instance)) {

@@ -25,38 +25,7 @@ SOFTWARE.
 
 #pragma once
 #include <Arduino.h>
-
-// Nintendo Switch Gamepad Button Definitions
-enum NSButtons {
-  NSButton_Y = 0,
-  NSButton_B,
-  NSButton_A,
-  NSButton_X,
-  NSButton_LeftTrigger,
-  NSButton_RightTrigger,
-  NSButton_LeftThrottle,
-  NSButton_RightThrottle,
-  NSButton_Minus,
-  NSButton_Plus,
-  NSButton_LeftStick,
-  NSButton_RightStick,
-  NSButton_Home,
-  NSButton_Capture,
-  NSButton_Reserved1,
-  NSButton_Reserved2
-};
-
-// D-Pad directions
-typedef uint8_t NSDirection_t;
-#define NSGAMEPAD_DPAD_UP           0
-#define NSGAMEPAD_DPAD_UP_RIGHT     1
-#define NSGAMEPAD_DPAD_RIGHT        2
-#define NSGAMEPAD_DPAD_DOWN_RIGHT   3
-#define NSGAMEPAD_DPAD_DOWN         4
-#define NSGAMEPAD_DPAD_DOWN_LEFT    5
-#define NSGAMEPAD_DPAD_LEFT         6
-#define NSGAMEPAD_DPAD_UP_LEFT      7
-#define NSGAMEPAD_DPAD_CENTERED     0xF
+#include "switch_tinyusb.h"  // Use definitions from switch_tinyusb library
 
 // Button names lookup table
 static const char* NS_BUTTON_NAMES[] = {
@@ -97,19 +66,6 @@ static const char* NS_DPAD_NAMES[] = {
   "Center (14)",
   "Center"
 };
-
-// Nintendo Switch Gamepad Report Structure
-#define ATTRIBUTE_PACKED  __attribute__((packed, aligned(1)))
-
-typedef struct ATTRIBUTE_PACKED {
-  uint16_t buttons;
-  uint8_t dPad;
-  uint8_t leftXAxis;
-  uint8_t leftYAxis;
-  uint8_t rightXAxis;
-  uint8_t rightYAxis;
-  uint8_t filler;
-} HID_NSGamepadReport_Data_t;
 
 // Parse and print Nintendo Switch gamepad report
 inline void parseNSGamepadReport(const uint8_t* report, uint16_t len) {
