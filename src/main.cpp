@@ -7,8 +7,9 @@
 #include "switch_controller_output.h"
 #include "pro2_handshake.h"
 
-// Debug output disabled (production mode - low latency)
-#define DEBUG_SERIAL 0
+// Debug modes
+#define DEBUG_SERIAL 0          // Enable serial output with button parsing
+#define DEBUG_DISABLE_OUTPUT 0  // Disable Switch output (for testing Pro 2 handshake only)
 
 #define LED_PIN 16
 #define NUM_LEDS 1
@@ -39,8 +40,10 @@ void core1_main() {
 }
 
 void setup() {
+#if !DEBUG_DISABLE_OUTPUT
   // CRITICAL: Initialize USB device FIRST before anything else
   initSwitchOutput();
+#endif
   
   // Initialize Pro 2 handshake system
   initPro2Handshake();
@@ -72,6 +75,7 @@ void setup() {
 }
 
 void loop() {
+#if !DEBUG_DISABLE_OUTPUT
   // Service USB device stack
   tud_task();
   
@@ -81,6 +85,7 @@ void loop() {
     sendSwitchReport();
     last_report = millis();
   }
+#endif
   
   delay(1);
 }
@@ -216,8 +221,14 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
   (void)instance;
 #endif
 
-  // Forward input HID report to output gamepad (ALWAYS)
+  // Forward input HID report to output gamepad
+#if !DEBUG_DISABLE_OUTPUT
   forwardHIDReport(report, len);
+#else
+  // Output disabled - just log in debug mode
+  (void)report;
+  (void)len;
+#endif
 
   // Request next report
   if (!tuh_hid_receive_report(dev_addr, instance)) {
