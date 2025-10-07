@@ -1,0 +1,3 @@
+[submodule "lib/switch_tinyusb"]
+	path = lib/switch_tinyusb
+	url = https://github.com/touchgadget/switch_tinyusb.git
