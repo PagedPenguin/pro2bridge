@@ -16,21 +16,33 @@ extern NSGamepad SwitchGamepad;
 
 // Initialize the Switch gamepad output
 inline void initSwitchOutput() {
+  // Start TinyUSB device stack first
+  TinyUSBDevice.begin(0);
+  
+  // Initialize gamepad with proper descriptors
   SwitchGamepad.begin();
   
-  // Wait until device mounted
+  // Wait until device mounted (critical for Switch recognition)
   uint32_t start = millis();
-  while (!USBDevice.mounted() && (millis() - start < 5000)) {
-    delay(10);
+  while (!TinyUSBDevice.mounted() && (millis() - start < 5000)) {
+    delay(1);
   }
   
-  // Send initial neutral report
+  // Give Switch time to enumerate
+  delay(100);
+  
+  // Send initial neutral report (Switch expects this)
   SwitchGamepad.releaseAll();
   SwitchGamepad.leftXAxis(0x80);   // Center
   SwitchGamepad.leftYAxis(0x80);
   SwitchGamepad.rightXAxis(0x80);
   SwitchGamepad.rightYAxis(0x80);
   SwitchGamepad.dPad(NSGAMEPAD_DPAD_CENTERED);
+  
+  // Wait for ready and send
+  for (int i = 0; i < 10 && !SwitchGamepad.ready(); i++) {
+    delay(10);
+  }
   if (SwitchGamepad.ready()) {
     SwitchGamepad.write();
   }

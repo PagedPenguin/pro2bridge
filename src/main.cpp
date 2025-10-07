@@ -38,7 +38,13 @@ void core1_main() {
 }
 
 void setup() {
-  // Blink LED to show we're starting
+  // CRITICAL: Initialize USB device FIRST before anything else
+  initSwitchOutput();
+  
+  // Wait for USB enumeration to complete
+  delay(1000);
+  
+  // Now initialize LED
   strip.begin();
   strip.setPixelColor(0, 0xFF0000);  // Red = starting
   strip.show();
@@ -49,20 +55,10 @@ void setup() {
 #if DEBUG_SERIAL
   // Initialize Serial for debugging
   Serial.begin(115200);
-  delay(2000);
+  delay(1000);
   Serial.println("\n=== RP2350 USB HID Bridge (Debug Mode) ===");
   Serial.println("Native USB: Emulating USB Gamepad + Serial");
   Serial.println("GPIO 12/13: Waiting for input controller...\n");
-#endif
-  
-  // Initialize Switch gamepad output on native USB
-  initSwitchOutput();
-  
-  delay(2000);  // Wait for USB enumeration
-  
-  // Initial report already sent by initSwitchOutput()
-
-#if DEBUG_SERIAL
   Serial.println("Gamepad initialized. Waiting for input...");
 #endif
   
