@@ -31,13 +31,30 @@ struct Pro2HandshakeState {
 // Global handshake state (support up to 4 devices)
 static Pro2HandshakeState handshake_state[4] = {0};
 
-// Initialization Command 0x03 - Starts HID output at 4ms intervals
-// Note: MAC address bytes (0xFF) should be replaced with actual console MAC address
-static const uint8_t INIT_COMMAND_0x03[] = {
+// Pro 2 initialization commands (sent via USB bulk endpoint)
+// Command 0x03 - Starts HID output at 4ms intervals
+static const uint8_t INIT_CMD_0x03[] = {
   0x03,                           // Command ID
-  0x91, 0x00, 0x0d, 0x00,        // Unknown parameters
-  0x08, 0x00, 0x00, 0x01, 0x00,  // Unknown parameters
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF  // Console MAC Address (Little Endian)
+  0x91, 0x00, 0x0D, 0x00,        // Parameters
+  0x08, 0x00, 0x00, 0x01, 0x00,  // Parameters
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00  // Console MAC Address (placeholder)
+};
+
+// Command 0x07 - Unknown but required
+static const uint8_t INIT_CMD_0x07[] = {
+  0x07,                           // Command ID
+  0x91, 0x00, 0x01, 0x00,        // Parameters
+  0x00, 0x00, 0x00               // Padding
+};
+
+// Command 0x15 Arg 0x01 - Request Controller MAC
+static const uint8_t INIT_CMD_0x15_01[] = {
+  0x15,                           // Command ID
+  0x91, 0x00, 0x01, 0x00,        // Parameters (Arg 0x01)
+  0x0E, 0x00, 0x00, 0x00, 0x02,  // Parameters
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // Console MAC
+  0x00,                           // MAC byte with bit masked
+  0x00, 0x00, 0x00, 0x00, 0x00   // Remainder of MAC
 };
 
 // Check if device is a Pro 2 controller
@@ -63,7 +80,7 @@ inline bool isNintendoController(uint8_t dev_addr) {
   return false;
 }
 
-// Send handshake command to Pro 2 controller
+// Send handshake commands to Pro 2 controller via bulk endpoint
 inline bool sendPro2Handshake(uint8_t dev_addr, uint8_t instance) {
   if (instance >= 4) return false;
   
@@ -89,23 +106,40 @@ inline bool sendPro2Handshake(uint8_t dev_addr, uint8_t instance) {
     return state->handshake_complete;
   }
   
-  // Send initialization command via HID Set_Report
-  // This uses the control endpoint to send the command
-  bool success = tuh_hid_set_report(
-    dev_addr, 
-    instance,
-    0,  // Report ID (0 for no ID)
-    HID_REPORT_TYPE_OUTPUT,
-    (void*)INIT_COMMAND_0x03,
-    sizeof(INIT_COMMAND_0x03)
-  );
+  // Pro 2 uses USB bulk OUT endpoint (EP 0x01) for commands
+  // Send initialization sequence: 0x03, 0x07, 0x15
+  
+#if DEBUG_SERIAL
+  Serial.printf("Sending Pro 2 init sequence to addr=%u inst=%u\n", dev_addr, instance);
+#endif
+  
+  // Command 0x03 - Start HID output at 4ms intervals
+  bool success = tuh_hid_send_report(dev_addr, instance, 0, 
+                                      (void*)INIT_CMD_0x03, sizeof(INIT_CMD_0x03));
+  
+  if (success) {
+    delay(10);  // Small delay between commands
+    
+    // Command 0x07 - Unknown but required
+    success = tuh_hid_send_report(dev_addr, instance, 0,
+                                   (void*)INIT_CMD_0x07, sizeof(INIT_CMD_0x07));
+    delay(10);
+    
+    // Command 0x15 - Request controller MAC
+    success = tuh_hid_send_report(dev_addr, instance, 0,
+                                   (void*)INIT_CMD_0x15_01, sizeof(INIT_CMD_0x15_01));
+  }
   
   if (success) {
     state->handshake_sent = true;
     state->handshake_time = millis();
     
 #if DEBUG_SERIAL
-    Serial.printf("Pro 2 handshake sent to addr=%u inst=%u\n", dev_addr, instance);
+    Serial.println("Pro 2 init sequence sent successfully");
+#endif
+  } else {
+#if DEBUG_SERIAL
+    Serial.println("Pro 2 init sequence FAILED");
 #endif
   }
   
