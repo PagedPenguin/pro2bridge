@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ProCon 2 Enabler Tool</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1e1e2f;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background: linear-gradient(90deg, #3a3fbd, #6b6ff7);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      color: #fff;
+    }
+
+    .content {
+      padding: 2rem;
+      max-width: 900px;
+      text-align: center;
+    }
+
+    button {
+      background: #6b6ff7;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-bottom: 1rem;
+      margin-right: 0.5rem;
+    }
+
+    button:hover {
+      background: #4f53d0;
+    }
+
+    button:disabled {
+      background: #4a4a5a;
+      cursor: not-allowed;
+    }
+
+    button.stop-button {
+      background: #ff4444;
+    }
+
+    button.stop-button:hover {
+      background: #cc3333;
+    }
+
+    pre {
+      background: #2d2d3a;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      text-align: left;
+      max-height: 400px;
+    }
+
+    .connection-section {
+      background: #29293f;
+      margin-top: 2rem;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .connection-section h3 {
+      margin-top: 0;
+      color: #90caff;
+    }
+
+    .hex-section {
+      background: #29293f;
+      margin-top: 2rem;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .hex-section h3 {
+      margin-top: 0;
+      color: #90caff;
+    }
+
+    .haptic-section {
+      background: #29293f;
+      margin-top: 2rem;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .haptic-section h3 {
+      margin-top: 0;
+      color: #ff9090;
+    }
+
+    .hex-input {
+      width: 100%;
+      max-width: 600px;
+      padding: 0.8rem;
+      font-size: 1rem;
+      background: #2d2d3a;
+      border: 2px solid #4a4a5a;
+      border-radius: 6px;
+      color: #ffffff;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 1rem;
+    }
+
+    .hex-input:focus {
+      outline: none;
+      border-color: #6b6ff7;
+    }
+
+    .hex-examples {
+      text-align: left;
+      margin: 1rem auto;
+      display: inline-block;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    .gc-ultimate {
+      background: #29293f;
+      margin-top: 3rem;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .gc-ultimate h2 {
+      margin-top: 0;
+      color: #90caff;
+    }
+
+    .gc-ultimate img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin: 1rem 0;
+    }
+
+    .gc-ultimate ul {
+      text-align: left;
+      margin: 1rem auto;
+      display: inline-block;
+    }
+
+    .gc-ultimate a {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.8rem 1.5rem;
+      background: #90caff;
+      color: #1e1e2f;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.3s ease;
+    }
+
+    .gc-ultimate a:hover {
+      background: #69b8ff;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ff4444;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .status-indicator.connected {
+      background: #44ff44;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-item {
+      background: #2d2d3a;
+      padding: 1rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dual-input-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .input-group {
+      background: #2d2d3a;
+      padding: 1.5rem;
+      border-radius: 8px;
+    }
+
+    .input-group h4 {
+      margin-top: 0;
+      color: #90caff;
+      font-size: 1.1rem;
+    }
+
+    .haptic-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .haptic-status {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+
+      .status-grid,
+      .dual-input-section {
+        grid-template-columns: 1fr;
+      }
+
+      .haptic-controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>ProCon 2 Enabler Tool</h1>
+    <p>Free & Open Source Utility to Enable ProCon 2 on Windows/Android</p>
+  </header>
+
+  <div class="content">
+    <div class="connection-section">
+      <h3>Device Connection</h3>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="status-indicator" id="usbStatusIndicator"></span>
+          <span id="usbStatusText">USB: Disconnected</span>
+        </div>
+        <div class="status-item">
+          <span class="status-indicator" id="hidStatusIndicator"></span>
+          <span id="hidStatusText">HID: Disconnected</span>
+        </div>
+      </div>
+      <button id="connectUsbBtn">Enable HID Output</button>
+      <button id="connectHidBtn">Dev Mode</button>
+      <pre id="log">Ready to connect...</pre>
+    </div>
+
+    <div class="haptic-section">
+      <h3>🎮 Haptic Playback</h3>
+      <p>Play test haptic feedback patterns on your controller. HID connection required.</p>
+
+      <div class="haptic-controls">
+        <button id="playHapticBtn" disabled>Play Test Haptic</button>
+        <button id="stopHapticBtn" class="stop-button" disabled>Stop Haptic</button>
+      </div>
+
+      <div class="haptic-status" id="hapticStatus">Ready to play haptic feedback</div>
+    </div>
+
+    <div class="gc-ultimate">
+      <p>While you're here... check out another project I developed!</p>
+      <h2>Introducing: GC Ultimate</h2>
+      <p>An open source GameCube style gamepad built for pros, tinkerers, and retro lovers.</p>
+      <img
+        src="https://handheldlegend.com/cdn/shop/files/GCU_Photo_Studio_2025-May-30_10-43-30PM-000_CustomizedView7560275539_png.png?v=1748891487&width=700"
+        alt="GC Ultimate Render Placeholder">
+      <ul>
+        <li>🕹️ Hall effect / TMR joysticks</li>
+        <li>🔄 Swappable gateplate</li>
+        <li>🖥️ Compatible with Switch 2, Switch, PC</li>
+        <li>🎮 Retro console support</li>
+        <li>🌈 RGB underglow buttons</li>
+        <li>🎯 Analog trigger support (XInput + GameCube)</li>
+        <li>🧠 Fully open source 3D parts + firmware</li>
+        <li>🔌 Bluetooth + USB-C operation</li>
+      </ul>
+      <br>
+      <a href="https://gcultimate.com" target="_blank">Sign Up For Launch Notification!</a>
+    </div>
+
+
+
+    <div class="hex-section">
+      <h3>Send Custom Data</h3>
+      <p>Enter hex values separated by spaces or commas. Device must be connected first.</p>
+
+      <div class="dual-input-section">
+        <div class="input-group">
+          <h4>USB Bulk Endpoint</h4>
+          <input type="text" class="hex-input" id="usbHexInput"
+            placeholder="03 91 00 0d 00 08 00 00 01 00 FF FF FF FF FF FF" disabled>
+          <button id="sendUsbHexBtn" disabled>Send USB Data</button>
+        </div>
+
+        <div class="input-group">
+          <h4>HID Output Report</h4>
+          <input type="text" class="hex-input" id="hidHexInput"
+            placeholder="02 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10" disabled>
+          <button id="sendHidHexBtn" disabled>Send HID Report</button>
+        </div>
+      </div>
+
+      <div class="hex-examples">
+        <strong>Example formats:</strong><br>
+        • Space separated: 03 91 00 0d 00 08<br>
+        • Comma separated: 0x03, 0x91, 0x00, 0x0d<br>
+        • Mixed: 03,91 00 0d,00 08<br>
+        • No prefix needed: FF FF FF or 0xFF 0xFF 0xFF<br>
+        <br>
+        <strong>HID Output Reports:</strong><br>
+        • Start with report ID (usually 0x02)<br>
+        • Followed by data payload<br>
+        • Example: 02 01 02 03 04 (Report ID 0x02 + 4 data bytes)
+      </div>
+    </div>
+
+
+  </div>
+
+  <script>
+
+    const VENDOR_ID = 0x057E;
+    const PRODUCT_ID_JOYCON2_R = 0x2066;
+    const PRODUCT_ID_JOYCON2_L = 0x2067;
+    const PRODUCT_ID_PROCON2 = 0x2069;
+    const PRODUCT_ID_GCNSO = 0x2073;
+    const USB_INTERFACE_NUMBER = 1;
+
+    // Nintendo Switch Controller Initialization Commands
+    // Note: MAC address bytes (0xFF) should be replaced with actual console MAC address
+
+    // Initialization Command 0x03 - Starts HID output at 4ms intervals
+    const INIT_COMMAND_0x03 = new Uint8Array([
+      0x03, 0x91, 0x00, 0x0d, 0x00, 0x08,
+      0x00, 0x00, 0x01, 0x00,
+      0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF  // Console MAC Address (Little Endian)
+    ]);
+
+    // Unknown Command 0x07
+    const UNKNOWN_COMMAND_0x07 = new Uint8Array([
+      0x07, 0x91, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x00
+    ]);
+
+    // Unknown Command 0x16
+    const UNKNOWN_COMMAND_0x16 = new Uint8Array([
+      0x16, 0x91, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x00
+    ]);
+
+    // Request Controller MAC Command 0x15 Arg 0x01
+    const REQUEST_CONTROLLER_MAC = new Uint8Array([
+      0x15, 0x91, 0x00, 0x01, 0x00, 0x0e,
+      0x00, 0x00, 0x00, 0x02,
+      0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // Console MAC Address (Little Endian)
+      0xFF,  // Byte 14 with bit 0 masked off
+      0xFF, 0xFF, 0xFF, 0xFF, 0xFF  // Remainder of Console MAC Address
+    ]);
+
+    // LTK Request Command 0x15 Arg 0x02
+    const LTK_REQUEST = new Uint8Array([
+      0x15, 0x91, 0x00, 0x02, 0x00, 0x11,
+      0x00, 0x00, 0x00,
+      0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // LTK - 16 byte key
+      0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+    ]);
+
+    // Unknown Command 0x15 Arg 0x03
+    const UNKNOWN_COMMAND_0x15_ARG_0x03 = new Uint8Array([
+      0x15, 0x91, 0x00, 0x03, 0x00, 0x01,
+      0x00, 0x00, 0x00
+    ]);
+
+    // Unknown Command 0x09
+    const UNKNOWN_COMMAND_0x09 = new Uint8Array([
+      0x09, 0x91, 0x00, 0x07, 0x00, 0x08,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    ]);
+
+    // IMU Command 0x0C Arg 0x02 - No ACK needed
+    const IMU_COMMAND_0x02 = new Uint8Array([
+      0x0c, 0x91, 0x00, 0x02, 0x00, 0x04,
+      0x00, 0x00, 0x27,
+      0x00, 0x00, 0x00
+    ]);
+
+    // SPI/FLASH/DATA Read Command 0x02 (ADDR 0x00013080)
+    const SPI_READ_0x00013080 = new Uint8Array([
+      0x02, 0x91, 0x00, 0x04, 0x00, 0x08,
+      0x00, 0x00, 0x40, 0x7e,
+      0x00, 0x00, 0x80, 0x30, 0x01, 0x00
+    ]);
+
+    // SPI Read 2 (ADDR 0x000130C0)
+    const SPI_READ_0x000130C0 = new Uint8Array([
+      0x02, 0x91, 0x00, 0x04, 0x00, 0x08,
+      0x00, 0x00, 0x40, 0x7e,
+      0x00, 0x00, 0xc0, 0x30, 0x01, 0x00
+    ]);
+
+    // SPI Read 3 (ADDR 0x001FC040)
+    const SPI_READ_0x001FC040 = new Uint8Array([
+      0x02, 0x91, 0x00, 0x04, 0x00, 0x08,
+      0x00, 0x00, 0x40, 0x7e,
+      0x00, 0x00, 0x40, 0xc0, 0x1f, 0x00
+    ]);
+
+    // SPI Read 4 (ADDR 0x00013040)
+    const SPI_READ_0x00013040 = new Uint8Array([
+      0x02, 0x91, 0x00, 0x04, 0x00, 0x08,
+      0x00, 0x00, 0x40, 0x7e,
+      0x00, 0x00, 0x40, 0x30, 0x01, 0x00
+    ]);
+
+    // SPI Read 5 (ADDR 0x00013100)
+    const SPI_READ_0x00013100 = new Uint8Array([
+      0x02, 0x91, 0x00, 0x04, 0x00, 0x08,
+      0x00, 0x00, 0x40, 0x7e,
+      0x00, 0x00, 0x00, 0x31, 0x01, 0x00
+    ]);
+
+    // OUT Unknown Command 0x11
+    const OUT_UNKNOWN_COMMAND_0x11 = new Uint8Array([
+      0x11, 0x91, 0x00, 0x03,
+      0x00, 0x00, 0x00, 0x00
+    ]);
+
+    // SPI Read 6 (ADDR 0x00013060)
+    const SPI_READ_0x00013060 = new Uint8Array([
+      0x02, 0x91, 0x00, 0x04, 0x00, 0x08,
+      0x00, 0x00, 0x40, 0x7e,
+      0x00, 0x00, 0x60, 0x30, 0x01, 0x00
+    ]);
+
+    // Unknown Command 0x0A
+    const UNKNOWN_COMMAND_0x0A = new Uint8Array([
+      0x0a, 0x91, 0x00, 0x08, 0x00, 0x14,
+      0x00, 0x00, 0x01,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0x35, 0x00, 0x46,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    ]);
+
+    // IMU Command 0x0C Arg 0x04
+    const IMU_COMMAND_0x04 = new Uint8Array([
+      0x0c, 0x91, 0x00, 0x04, 0x00, 0x04,
+      0x00, 0x00, 0x27,
+      0x00, 0x00, 0x00
+    ]);
+
+    // Enable Haptics (Probably) 0x03
+    const ENABLE_HAPTICS = new Uint8Array([
+      0x03, 0x91, 0x00, 0x0a, 0x00, 0x04,
+      0x00, 0x00, 0x09,
+      0x00, 0x00, 0x00
+    ]);
+
+    // OUT Unknown Command 0x10 - No ACK
+    const OUT_UNKNOWN_COMMAND_0x10 = new Uint8Array([
+      0x10, 0x91, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x00
+    ]);
+
+    // OUT Unknown Command 0x01
+    const OUT_UNKNOWN_COMMAND_0x01 = new Uint8Array([
+      0x01, 0x91, 0x00, 0x0c,
+      0x00, 0x00, 0x00, 0x00
+    ]);
+
+    // OUT Unknown Command 0x03 (different from init command)
+    const OUT_UNKNOWN_COMMAND_0x03 = new Uint8Array([
+      0x03, 0x91, 0x00, 0x01,
+      0x00, 0x00, 0x00
+    ]);
+
+    // OUT Unknown Command 0x0A (different from earlier 0x0A)
+    const OUT_UNKNOWN_COMMAND_0x0A_ALT = new Uint8Array([
+      0x0a, 0x91, 0x00, 0x02, 0x00, 0x04,
+      0x00, 0x00, 0x03,
+      0x00, 0x00
+    ]);
+
+    // Set Player LED 0x09 - LED value should be set as needed (0x0, 0x1, 0x3, 0x7, etc.)
+    const SET_PLAYER_LED = new Uint8Array([
+      0x09, 0x91, 0x00, 0x07, 0x00, 0x08,
+      0x00, 0x00, 
+      0x01,  // LED bitfield - replace 0x00 with desired LED pattern
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    ]);
+
+    // Test haptic pattern - array of 5-byte haptic data
+    const TEST_HAPTIC_PATTERN = [
+      [0x93, 0x35, 0x36, 0x1c, 0x0d],
+      [0xa8, 0x29, 0xc5, 0xdc, 0x0c],
+      [0x75, 0x21, 0xb5, 0x5d, 0x13],
+      [0x75, 0xf5, 0x70, 0x1e, 0x11],
+      [0xba, 0x55, 0x40, 0x1e, 0x08],
+      [0x90, 0x31, 0x10, 0x9e, 0x00],
+      [0x90, 0x15, 0x10, 0x9e, 0x00],
+      [0x90, 0x15, 0x10, 0x9e, 0x00],
+      [0x90, 0x01, 0x10, 0x1e, 0x00],
+      [0x90, 0x15, 0x10, 0x9e, 0x00],
+      [0x75, 0x15, 0x73, 0x1e, 0x11],
+      [0x7b, 0x95, 0x92, 0x5c, 0x13],
+      [0x8d, 0xc5, 0xa1, 0x1b, 0x10],
+      [0x7e, 0x31, 0xc1, 0xdc, 0x0b],
+      [0x6f, 0x2d, 0x31, 0xdc, 0x03],
+      [0x75, 0x19, 0x41, 0x9b, 0x03],
+      [0x6f, 0x15, 0xe1, 0xda, 0x02],
+      [0x66, 0xf1, 0xe0, 0xda, 0x02],
+      [0x63, 0xdd, 0x10, 0x5b, 0x02],
+      [0x5a, 0xb9, 0x10, 0x5b, 0x02],
+      [0x4e, 0x99, 0x50, 0x5a, 0x02],
+      [0x45, 0x81, 0x20, 0x5a, 0x02],
+      [0x48, 0x85, 0x50, 0x5a, 0x02],
+      [0x4b, 0x85, 0x50, 0x5a, 0x02],
+      [0x4b, 0x7d, 0x80, 0x5a, 0x02],
+      [0x48, 0x71, 0x20, 0x5a, 0x02],
+      [0x48, 0x71, 0xc0, 0x99, 0x02],
+      [0x45, 0x65, 0x90, 0x99, 0x02],
+      [0x42, 0x61, 0x90, 0x99, 0x02],
+      [0x3c, 0x59, 0xd0, 0x98, 0x02],
+      [0x36, 0x59, 0xa0, 0x98, 0x02],
+      [0x30, 0x55, 0x70, 0x18, 0x02],
+      [0x2a, 0x55, 0x70, 0x18, 0x02],
+      [0x27, 0x4d, 0x70, 0x18, 0x02],
+      [0x21, 0x4d, 0x70, 0x18, 0x02],
+      [0x24, 0x45, 0x70, 0x18, 0x02],
+      [0x2a, 0x45, 0xa0, 0x18, 0x02],
+      [0x2d, 0x41, 0xa0, 0x58, 0x01],
+      [0x36, 0x41, 0xf0, 0x59, 0x01],
+      [0x39, 0x41, 0xf0, 0x59, 0x01],
+      [0x3f, 0x39, 0xf0, 0x99, 0x00],
+      [0x3f, 0x39, 0xf0, 0x99, 0x00],
+      [0x3f, 0x39, 0xf0, 0x99, 0x00],
+      [0x3f, 0x31, 0xf0, 0x99, 0x00],
+      [0x3f, 0x31, 0xf0, 0x99, 0x00],
+      [0x3f, 0x31, 0xf0, 0x99, 0x00],
+      [0x3f, 0x2d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x2d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x2d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x25, 0xf0, 0x99, 0x00],
+      [0x3f, 0x25, 0xf0, 0x99, 0x00],
+      [0x3f, 0x25, 0xf0, 0x99, 0x00],
+      [0x3f, 0x25, 0xf0, 0x99, 0x00],
+      [0x3f, 0x25, 0xf0, 0x99, 0x00],
+      [0x3f, 0x1d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x1d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x1d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x1d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x1d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x1d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x1d, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x19, 0xf0, 0x99, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00],
+      [0x3f, 0x01, 0xf0, 0x19, 0x00]
+    ];
+
+    let currentUsbDevice = null;
+    let currentUsbEndpoint = null;
+    let currentHidDevice = null;
+    let hapticInterval = null;
+    let hapticCounter = 0;
+    let isPlayingHaptic = false;
+
+    const log = (msg) => {
+      const el = document.getElementById('log');
+      el.textContent += msg + '\n';
+      el.scrollTop = el.scrollHeight;
+    };
+
+    const updateUsbStatus = (connected) => {
+      const indicator = document.getElementById('usbStatusIndicator');
+      const text = document.getElementById('usbStatusText');
+
+      if (connected) {
+        indicator.classList.add('connected');
+        text.textContent = 'USB: Connected';
+      } else {
+        indicator.classList.remove('connected');
+        text.textContent = 'USB: Disconnected';
+      }
+      updateButtonStates();
+    };
+
+    const updateHidStatus = (connected) => {
+      const indicator = document.getElementById('hidStatusIndicator');
+      const text = document.getElementById('hidStatusText');
+
+      if (connected) {
+        indicator.classList.add('connected');
+        text.textContent = 'HID: Connected';
+      } else {
+        indicator.classList.remove('connected');
+        text.textContent = 'HID: Disconnected';
+      }
+      updateButtonStates();
+    };
+
+    const updateButtonStates = () => {
+      const usbConnected = currentUsbDevice && currentUsbEndpoint;
+      const hidConnected = currentHidDevice;
+
+      document.getElementById('usbHexInput').disabled = !usbConnected;
+      document.getElementById('sendUsbHexBtn').disabled = !usbConnected;
+      document.getElementById('hidHexInput').disabled = !hidConnected;
+      document.getElementById('sendHidHexBtn').disabled = !hidConnected;
+      document.getElementById('playHapticBtn').disabled = !hidConnected || isPlayingHaptic;
+      document.getElementById('stopHapticBtn').disabled = !hidConnected || !isPlayingHaptic;
+    };
+
+    const updateHapticStatus = (message) => {
+      document.getElementById('hapticStatus').textContent = message;
+    };
+
+    const createHapticReport = (hapticData, counter) => {
+      const report = new Uint8Array(64);
+      report[0] = 0x02; // Report ID
+      report[1] = 0x50 | (counter & 0x0F); // 0x5X where X increments 0-F
+      report[17] = report[1];
+
+      // Insert 4 bytes of haptic data
+      for (let i = 0; i < 5 && i < hapticData.length; i++) {
+        report[2 + i] = hapticData[i];
+        report[18 + i] = hapticData[i];
+      }
+
+      // Rest is already zeroed by Uint8Array constructor
+      return report;
+    };
+
+    const playHapticPattern = async () => {
+      if (!currentHidDevice || isPlayingHaptic) return;
+
+      isPlayingHaptic = true;
+      hapticCounter = 0;
+      let patternIndex = 0;
+      updateButtonStates();
+      updateHapticStatus('Playing haptic pattern...');
+      log('Starting haptic playback...');
+
+      hapticInterval = setInterval(async () => {
+        try {
+          if (patternIndex >= TEST_HAPTIC_PATTERN.length) {
+            stopHapticPattern();
+            return;
+          }
+
+          const hapticData = TEST_HAPTIC_PATTERN[patternIndex];
+          const report = createHapticReport(hapticData, hapticCounter);
+
+          log(`HID Report: ${Array.from(report).map(b => b.toString(16).padStart(2, '0')).join(' ')}`);
+
+          // Send HID report
+          await currentHidDevice.sendReport(report[0], report.slice(1));
+
+          log(`Sent haptic packet ${patternIndex + 1}/${TEST_HAPTIC_PATTERN.length} (counter: 0x${hapticCounter.toString(16)})`);
+          updateHapticStatus(`Playing pattern ${patternIndex + 1}/${TEST_HAPTIC_PATTERN.length} (counter: 0x${hapticCounter.toString(16)})`);
+
+          hapticCounter = (hapticCounter + 1) & 0x0F; // Loop 0-15
+          patternIndex++;
+
+        } catch (err) {
+          log('Error sending haptic data: ' + err.message);
+          stopHapticPattern();
+        }
+      }, 4); // 4ms intervals
+    };
+
+    const stopHapticPattern = () => {
+      if (hapticInterval) {
+        clearInterval(hapticInterval);
+        hapticInterval = null;
+      }
+
+      isPlayingHaptic = false;
+      updateButtonStates();
+      updateHapticStatus('Haptic playback stopped');
+      log('Haptic playback stopped');
+
+      // Send stop command
+      if (currentHidDevice) {
+        try {
+          const stopReport = createHapticReport([0x00, 0x00, 0x00, 0x00], hapticCounter);
+          currentHidDevice.sendReport(stopReport[0], stopReport.slice(1));
+          log('Sent haptic stop command');
+        } catch (err) {
+          log('Error sending haptic stop command: ' + err.message);
+        }
+      }
+    };
+
+    const parseHexString = (hexStr) => {
+      const cleaned = hexStr
+        .replace(/0x/gi, '')
+        .replace(/[,\s]+/g, ' ')
+        .trim();
+
+      if (!cleaned) {
+        throw new Error('Empty hex string');
+      }
+
+      const hexPairs = cleaned.split(' ').filter(h => h.length > 0);
+      const bytes = [];
+
+      for (const hex of hexPairs) {
+        if (hex.length > 2) {
+          throw new Error(`Invalid hex value: ${hex} (too long)`);
+        }
+
+        const padded = hex.padStart(2, '0');
+        const byte = parseInt(padded, 16);
+
+        if (isNaN(byte)) {
+          throw new Error(`Invalid hex value: ${hex}`);
+        }
+
+        bytes.push(byte);
+      }
+
+      return new Uint8Array(bytes);
+    };
+
+    const sendUsbData = async (data) => {
+      if (!currentUsbDevice || !currentUsbEndpoint) {
+        throw new Error('USB device not connected');
+      }
+
+      // Send the command
+      const writeResult = await currentUsbDevice.transferOut(currentUsbEndpoint.endpointNumber, data);
+
+      // Add a small delay to ensure the device has time to respond
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Always try to read 32 bytes
+      let readResult = null;
+      try {
+        readResult = await currentUsbDevice.transferIn(currentUsbEndpoint.endpointNumber, 32);
+
+        if (readResult.status === 'ok' && readResult.data) {
+          const responseData = new Uint8Array(readResult.data.buffer);
+          console.log(`Received ${responseData.length} bytes:`,
+            Array.from(responseData).map(b => `0x${b.toString(16).padStart(2, '0')}`).join(' '));
+        }
+      } catch (readError) {
+        console.error('Failed to read response:', readError);
+      }
+
+      return { writeResult, readResult };
+    };
+
+    // Separate function for SPI read/write operations
+    const sendSpiCommand = async (spiCommandData) => {
+      if (!currentUsbDevice || !currentUsbEndpoint) {
+        throw new Error('USB device not connected');
+      }
+
+      // Send the SPI command
+      const writeResult = await currentUsbDevice.transferOut(currentUsbEndpoint.endpointNumber, spiCommandData);
+
+      // Add a small delay to ensure the device has time to respond
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // For SPI commands, read based on the length field (byte 8) + header overhead
+      const dataLength = spiCommandData[8] || 0;
+      const expectedReadLength = dataLength + 16; // Data + header
+
+      let readResult = null;
+      try {
+        readResult = await currentUsbDevice.transferIn(currentUsbEndpoint.endpointNumber, expectedReadLength);
+
+        if (readResult.status === 'ok' && readResult.data) {
+          const responseData = new Uint8Array(readResult.data.buffer);
+          console.log(`SPI Response - Received ${responseData.length} bytes:`,
+            Array.from(responseData).map(b => `0x${b.toString(16).padStart(2, '0')}`).join(' '));
+
+          // Extract just the data portion (skip the header)
+          if (responseData.length > 16) {
+            const dataOnly = responseData.slice(16, 16 + dataLength);
+            console.log(`SPI Data (${dataLength} bytes):`,
+              Array.from(dataOnly).map(b => `0x${b.toString(16).padStart(2, '0')}`).join(' '));
+          }
+        }
+      } catch (readError) {
+        console.error('Failed to read SPI response:', readError);
+      }
+
+      return { writeResult, readResult };
+    };
+    const sendHidData = async (data) => {
+      if (!currentHidDevice) {
+        throw new Error('HID device not connected');
+      }
+
+      // HID sendReport expects reportId as first parameter, data as second
+      const reportId = data[0];
+      const reportData = data.slice(1);
+
+      await currentHidDevice.sendReport(reportId, reportData);
+      return { status: 'ok', bytesWritten: data.length };
+    };
+
+    const connectUsb = async () => {
+      try {
+        log('Requesting USB device...');
+        const device = await navigator.usb.requestDevice({
+          filters: [
+            { vendorId: VENDOR_ID, productId: PRODUCT_ID_JOYCON2_L },
+            { vendorId: VENDOR_ID, productId: PRODUCT_ID_JOYCON2_R },
+            { vendorId: VENDOR_ID, productId: PRODUCT_ID_PROCON2 },
+            { vendorId: VENDOR_ID, productId: PRODUCT_ID_GCNSO }
+          ]
+        });
+
+        log('Opening USB device...');
+        await device.open();
+        log('USB device opened');
+
+        if (!device.configuration) {
+          await device.selectConfiguration(1);
+          log('USB configuration selected');
+        }
+
+        await device.claimInterface(USB_INTERFACE_NUMBER);
+        log('USB interface claimed');
+
+        const iface = device.configuration.interfaces[USB_INTERFACE_NUMBER];
+        const endpointOut = iface.alternate.endpoints.find(
+          ep => ep.direction === 'out' && ep.type === 'bulk'
+        );
+
+        if (!endpointOut) {
+          throw new Error('No bulk OUT endpoint found');
+        }
+
+        log(`Found USB endpoint 0x${endpointOut.endpointNumber.toString(16)}`);
+
+        currentUsbDevice = device;
+        currentUsbEndpoint = endpointOut;
+        updateUsbStatus(true);
+        log('USB device ready for communication!');
+
+        // Automatically send the default report on connection
+        log('Automatically sending default report...');
+        try {
+
+          // 1. Initialization Command 0x03 - Starts HID output at 4ms intervals
+          await sendUsbData(INIT_COMMAND_0x03);
+
+          // 2. Unknown Command 0x07
+          await sendUsbData(UNKNOWN_COMMAND_0x07);
+
+          // 3. Unknown Command 0x16
+          await sendUsbData(UNKNOWN_COMMAND_0x16);
+
+          // 4. Request Controller MAC Command 0x15 Arg 0x01
+          await sendUsbData(REQUEST_CONTROLLER_MAC);
+
+          // 5. LTK Request Command 0x15 Arg 0x02
+          await sendUsbData(LTK_REQUEST);
+
+          // 6. Unknown Command 0x15 Arg 0x03
+          await sendUsbData(UNKNOWN_COMMAND_0x15_ARG_0x03);
+
+          // 7. Unknown Command 0x09
+          await sendUsbData(UNKNOWN_COMMAND_0x09);
+
+          // 8. IMU Command 0x0C Arg 0x02 - No ACK expected but we'll try to read anyway
+          await sendUsbData(IMU_COMMAND_0x02);
+
+          // 9. SPI Read Commands - Use the specialized SPI function
+          //await sendSpiCommand(SPI_READ_0x00013080);
+          //await sendSpiCommand(SPI_READ_0x000130C0);
+          //await sendSpiCommand(SPI_READ_0x001FC040);
+          //await sendSpiCommand(SPI_READ_0x00013040);
+          //await sendSpiCommand(SPI_READ_0x00013100);
+
+          // 10. OUT Unknown Command 0x11
+          await sendUsbData(OUT_UNKNOWN_COMMAND_0x11);
+
+          // 11. SPI Read 6
+          //await sendSpiCommand(SPI_READ_0x00013060);
+
+          // 12. Unknown Command 0x0A
+          await sendUsbData(UNKNOWN_COMMAND_0x0A);
+
+          // 13. IMU Command 0x0C Arg 0x04
+          await sendUsbData(IMU_COMMAND_0x04);
+
+          // 14. Enable Haptics
+          await sendUsbData(ENABLE_HAPTICS);
+
+          // 15. OUT Unknown Command 0x10 - No ACK expected but we'll try to read anyway
+          await sendUsbData(OUT_UNKNOWN_COMMAND_0x10);
+
+          // 16. OUT Unknown Command 0x01
+          await sendUsbData(OUT_UNKNOWN_COMMAND_0x01);
+
+          // 17. OUT Unknown Command 0x03
+          await sendUsbData(OUT_UNKNOWN_COMMAND_0x03);
+
+          // 18. OUT Unknown Command 0x0A (alternate)
+          await sendUsbData(OUT_UNKNOWN_COMMAND_0x0A_ALT);
+
+          // 19. Set Player LED - You can customize the LED pattern by modifying the array
+          await sendUsbData(SET_PLAYER_LED);
+
+          console.log('Controller initialization sequence complete!');
+
+        } catch (err) {
+          log('Error sending automatic default report: ' + err.message);
+        }
+
+        return device;
+      } catch (err) {
+        log('USB connection error: ' + err.message);
+        updateUsbStatus(false);
+        currentUsbDevice = null;
+        currentUsbEndpoint = null;
+        throw err;
+      }
+    };
+
+    const connectHid = async () => {
+      try {
+        log('Requesting HID device...');
+        const devices = await navigator.hid.requestDevice({
+          filters: [
+            { vendorId: VENDOR_ID, productId: PRODUCT_ID_JOYCON2_R },
+            { vendorId: VENDOR_ID, productId: PRODUCT_ID_JOYCON2_L },
+            { vendorId: VENDOR_ID, productId: PRODUCT_ID_PROCON2 },
+            { vendorId: VENDOR_ID, productId: PRODUCT_ID_GCNSO }
+          ]
+        });
+
+        if (devices.length === 0) {
+          throw new Error('No HID device selected');
+        }
+
+        const device = devices[0];
+        log(`Opening HID device: ${device.productName}`);
+
+        if (!device.opened) {
+          await device.open();
+        }
+
+        log('HID device opened');
+
+        currentHidDevice = device;
+        updateHidStatus(true);
+        log('HID device ready for communication!');
+
+        return device;
+      } catch (err) {
+        log('HID connection error: ' + err.message);
+        updateHidStatus(false);
+        currentHidDevice = null;
+        throw err;
+      }
+    };
+
+    // Event Listeners
+    document.getElementById('connectUsbBtn').addEventListener('click', async () => {
+      try {
+        await connectUsb();
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    document.getElementById('connectHidBtn').addEventListener('click', async () => {
+      try {
+        await connectHid();
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    document.getElementById('playHapticBtn').addEventListener('click', async () => {
+      try {
+        await playHapticPattern();
+      } catch (err) {
+        console.error(err);
+        log('Error starting haptic playback: ' + err.message);
+      }
+    });
+
+    document.getElementById('stopHapticBtn').addEventListener('click', () => {
+      stopHapticPattern();
+    });
+
+    document.getElementById('sendUsbHexBtn').addEventListener('click', async () => {
+      try {
+        const hexInput = document.getElementById('usbHexInput');
+        const hexStr = hexInput.value.trim();
+
+        if (!hexStr) {
+          log('Error: Please enter USB hex data');
+          return;
+        }
+
+        log(`Parsing USB hex string: "${hexStr}"`);
+        const data = parseHexString(hexStr);
+
+        log(`Parsed ${data.length} bytes: [${Array.from(data).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ')}]`);
+        log('Sending custom USB data...');
+
+        const result = await sendUsbData(data);
+        log(`Custom USB data sent. Status: ${result.status}`);
+        log(`Bytes transferred: ${result.bytesWritten}`);
+
+      } catch (err) {
+        console.error(err);
+        log('Error sending custom USB data: ' + err.message);
+      }
+    });
+
+    document.getElementById('sendHidHexBtn').addEventListener('click', async () => {
+      try {
+        const hexInput = document.getElementById('hidHexInput');
+        const hexStr = hexInput.value.trim();
+
+        if (!hexStr) {
+          log('Error: Please enter HID hex data');
+          return;
+        }
+
+        log(`Parsing HID hex string: "${hexStr}"`);
+        const data = parseHexString(hexStr);
+
+        if (data.length < 1) {
+          log('Error: HID data must include at least a report ID');
+          return;
+        }
+
+        log(`Parsed ${data.length} bytes: [${Array.from(data).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ')}]`);
+        log(`Report ID: 0x${data[0].toString(16).padStart(2, '0')}, Data: ${data.length - 1} bytes`);
+        log('Sending custom HID report...');
+
+        const result = await sendHidData(data);
+        log(`Custom HID report sent. Status: ${result.status}`);
+        log(`Bytes transferred: ${result.bytesWritten}`);
+
+      } catch (err) {
+        console.error(err);
+        log('Error sending custom HID report: ' + err.message);
+      }
+    });
+
+    // Allow Enter key to send custom data
+    document.getElementById('usbHexInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !document.getElementById('sendUsbHexBtn').disabled) {
+        document.getElementById('sendUsbHexBtn').click();
+      }
+    });
+
+    document.getElementById('hidHexInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !document.getElementById('sendHidHexBtn').disabled) {
+        document.getElementById('sendHidHexBtn').click();
+      }
+    });
+
+    // Handle device disconnection
+    if ('usb' in navigator) {
+      navigator.usb.addEventListener('disconnect', (event) => {
+        if (event.device === currentUsbDevice) {
+          log('USB device disconnected');
+          currentUsbDevice = null;
+          currentUsbEndpoint = null;
+          updateUsbStatus(false);
+        }
+      });
+    }
+
+    if ('hid' in navigator) {
+      navigator.hid.addEventListener('disconnect', (event) => {
+        if (event.device === currentHidDevice) {
+          log('HID device disconnected');
+          currentHidDevice = null;
+          updateHidStatus(false);
+          stopHapticPattern(); // Stop haptic if device disconnects
+        }
+      });
+    }
+
+    // Initial button state
+    updateButtonStates();
+  </script>
+</body>
+
+</html>

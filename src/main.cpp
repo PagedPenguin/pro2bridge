@@ -8,8 +8,8 @@
 #include "pro2_handshake.h"
 
 // Debug modes
-#define DEBUG_SERIAL 0          // Enable serial output with button parsing
-#define DEBUG_DISABLE_OUTPUT 0  // Disable Switch output (for testing Pro 2 handshake only)
+#define DEBUG_SERIAL 1          // Enable serial output with button parsing
+#define DEBUG_DISABLE_OUTPUT 1  // Disable Switch output (for testing Pro 2 handshake only)
 
 #define LED_PIN 16
 #define NUM_LEDS 1
@@ -65,13 +65,109 @@ void setup() {
   delay(1000);
   Serial.println("\n=== RP2350 USB HID Bridge (Debug Mode) ===");
   Serial.println("Native USB: Emulating USB Gamepad + Serial");
-  Serial.println("GPIO 12/13: Waiting for input controller...\n");
-  Serial.println("Gamepad initialized. Waiting for input...");
+  Serial.println("PIO USB Host: GPIO 12 (D+) / GPIO 13 (D-)");
+  Serial.println("Pro 2 Handshake: 17-command sequence enabled");
+  Serial.println("Waiting for input controller...\n");
 #endif
   
   // Launch USB host task on core1
   multicore_launch_core1(core1_main);
   delay(200);
+  
+#if DEBUG_SERIAL
+  Serial.println("✓ USB Host initialized on Core1 (PIO USB)");
+  Serial.println("✓ Ready to detect Pro 2 Controller\n");
+#endif
+
+  // Wait for USB host to enumerate devices - poll for up to 5 seconds
+#if DEBUG_SERIAL
+  Serial.println("Waiting for Pro 2 controller enumeration...");
+#endif
+  
+  bool controller_found = false;
+  uint32_t start_time = millis();
+  
+  // Poll for up to 5 seconds, checking every 100ms
+  while (!controller_found && (millis() - start_time) < 5000) {
+    // Give USB host task time to process
+    delay(100);
+    
+    // Check if a Pro 2 controller is connected
+    // Try device addresses 1-4 (typical range for USB host)
+    for (uint8_t addr = 1; addr <= 4; addr++) {
+      if (tuh_mounted(addr)) {
+        uint16_t vid, pid;
+        if (tuh_vid_pid_get(addr, &vid, &pid)) {
+#if DEBUG_SERIAL
+          Serial.printf("Found device at addr %u: VID:0x%04X PID:0x%04X\n", addr, vid, pid);
+#endif
+          
+          // Check if it's a Pro 2 controller
+          if (vid == 0x057E && pid == 0x2069) {
+#if DEBUG_SERIAL
+            Serial.println("\n>>> PRO 2 CONTROLLER FOUND AT BOOT <<<");
+            Serial.println("Initializing Pro 2 USB driver...");
+#endif
+            
+            // Initialize Pro 2 custom USB driver
+            pro2_driver_init(addr, USB_INTERFACE_NUMBER);
+            
+#if DEBUG_SERIAL
+            Serial.println("Sending handshake immediately...\n");
+#endif
+            
+            // Get HID instance count for this device
+            uint8_t hid_count = tuh_hid_instance_count(addr);
+            for (uint8_t inst = 0; inst < hid_count; inst++) {
+              // Send handshake to each HID instance
+              sendPro2Handshake(addr, inst);
+              delay(100);
+              
+              // Start receiving reports
+              tuh_hid_receive_report(addr, inst);
+            }
+            
+#if DEBUG_SERIAL
+            Serial.println("✓ Boot handshake complete!\n");
+#endif
+            controller_found = true;
+            break;  // Found and initialized, exit loop
+          }
+        }
+      }
+    }
+    
+#if DEBUG_SERIAL
+    if (!controller_found && (millis() - start_time) % 500 == 0) {
+      Serial.print(".");  // Progress indicator
+    }
+#endif
+  }
+  
+#if DEBUG_SERIAL
+  if (!controller_found) {
+    Serial.println("\nNo Pro 2 controller found via enumeration.");
+    Serial.println("Attempting blind handshake to addr=1, inst=0...\n");
+#endif
+    
+    // Try sending handshake blindly to address 1, instance 0
+    // This assumes the controller is at the first device address
+    delay(500);  // Extra delay for enumeration
+    
+#if DEBUG_SERIAL
+    Serial.println("Sending blind Pro 2 handshake...");
+#endif
+    
+    sendPro2Handshake(1, 0);  // Try address 1, instance 0
+    delay(200);
+    
+    // Try to start receiving reports
+    tuh_hid_receive_report(1, 0);
+    
+#if DEBUG_SERIAL
+    Serial.println("✓ Blind handshake sent. Waiting for controller response...\n");
+  }
+#endif
 }
 
 void loop() {
@@ -128,33 +224,90 @@ void tuh_umount_cb(uint8_t dev_addr) {
 void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance,
                       uint8_t const* desc_report, uint16_t desc_len) {
 #if DEBUG_SERIAL
-  Serial.printf("HID device mounted: addr=%u, inst=%u, report_len=%u\n",
-                dev_addr, instance, desc_len);
+  Serial.printf("\n=== HID Device Mounted ===\n");
+  Serial.printf("  Device Address: %u\n", dev_addr);
+  Serial.printf("  Instance: %u\n", instance);
+  Serial.printf("  Report Descriptor Length: %u bytes\n", desc_len);
   
-  // Check if it's a Nintendo controller
+  // Get device info
   uint16_t vid, pid;
   if (tuh_vid_pid_get(dev_addr, &vid, &pid)) {
-    Serial.printf("  VID:0x%04X PID:0x%04X\n", vid, pid);
+    Serial.printf("  VID: 0x%04X\n", vid);
+    Serial.printf("  PID: 0x%04X\n", pid);
+    
+    // Check if it's a Nintendo controller
     if (vid == 0x057E) {
-      Serial.println("  Nintendo controller detected!");
-      if (pid == 0x2069) {
-        Serial.println("  -> Pro 2 Controller - sending handshake...");
+      Serial.println("  ✓ Nintendo Controller Detected!");
+      
+      // Identify specific controller type
+      const char* controller_name = "Unknown";
+      bool is_pro2 = false;
+      
+      switch (pid) {
+        case 0x2066:
+          controller_name = "Joy-Con (R) 2";
+          break;
+        case 0x2067:
+          controller_name = "Joy-Con (L) 2";
+          break;
+        case 0x2069:
+          controller_name = "Pro Controller 2";
+          is_pro2 = true;
+          break;
+        case 0x2073:
+          controller_name = "GameCube Controller (NSO)";
+          break;
+        default:
+          controller_name = "Nintendo Device";
+          break;
       }
+      
+      Serial.printf("  Controller Type: %s\n", controller_name);
+      
+      if (is_pro2) {
+        Serial.println("\n  >>> PRO 2 CONTROLLER CONFIRMED <<<");
+        Serial.println("  Initializing Pro 2 USB driver...");
+        
+        // Initialize Pro 2 custom USB driver for bulk endpoint access
+        pro2_driver_init(dev_addr, USB_INTERFACE_NUMBER);
+        
+        Serial.println("  Initiating 17-command handshake sequence...");
+        
+        // Send Pro 2 handshake
+        bool handshake_result = sendPro2Handshake(dev_addr, instance);
+        
+        if (handshake_result) {
+          Serial.println("  ✓ Handshake sequence initiated successfully");
+        } else {
+          Serial.println("  ✗ Handshake sequence FAILED");
+        }
+        
+        // Wait longer for Pro 2 to process all commands
+        delay(200);
+      } else {
+        Serial.printf("  Not a Pro 2 controller - skipping handshake\n");
+      }
+    } else {
+      Serial.printf("  Non-Nintendo device (VID: 0x%04X)\n", vid);
     }
+  } else {
+    Serial.println("  Warning: Could not retrieve VID/PID");
   }
+  
+  Serial.println("=========================\n");
 #endif
+  
   (void)desc_report;
   (void)desc_len;
   
-  // Send Pro 2 handshake if needed
-  sendPro2Handshake(dev_addr, instance);
-  
-  // Small delay to let handshake process
-  delay(100);
-
+  // Request first report
   if (!tuh_hid_receive_report(dev_addr, instance)) {
 #if DEBUG_SERIAL
-    Serial.println("Failed to request initial report");
+    Serial.println("  ✗ Failed to request initial HID report");
+#endif
+  } else {
+#if DEBUG_SERIAL
+    Serial.println("  ✓ Initial HID report requested");
 #endif
   }
 }

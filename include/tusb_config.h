@@ -31,7 +31,7 @@ extern "C" {
 #define CFG_TUD_HID              1
 
 //--------------------------------------------------------------------
-// HOST CONFIGURATION (for PIO USB HID)
+// HOST CONFIGURATION (for PIO USB HID + Vendor)
 //--------------------------------------------------------------------
 
 #define CFG_TUH_ENUMERATION_BUFSIZE 256
@@ -40,6 +40,9 @@ extern "C" {
 #define CFG_TUH_HID                 4
 #define CFG_TUH_HID_EPIN_BUFSIZE    64
 #define CFG_TUH_HID_EPOUT_BUFSIZE   64
+
+// Vendor class disabled - causes compilation errors
+// #define CFG_TUH_VENDOR              1
 
 #ifdef __cplusplus
 }
