@@ -8,8 +8,8 @@
 #include "pro2_handshake.h"
 
 // Debug modes
-#define DEBUG_SERIAL 0          // Enable serial output with button parsing
-#define DEBUG_DISABLE_OUTPUT 0  // Disable Switch output (for testing Pro 2 handshake only)
+#define DEBUG_SERIAL 1          // Enable serial output with button parsing
+#define DEBUG_DISABLE_OUTPUT 1  // Disable Switch output (for testing Pro 2 handshake only)
 
 #define LED_PIN 16
 #define NUM_LEDS 1
@@ -94,22 +94,70 @@ void loop() {
 // TinyUSB Callbacks
 // ----------------------------------------------------------------------
 
+// Vendor-specific interface callback (for Pro 2 bulk endpoint)
+void tuh_vendor_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_itf, uint16_t desc_len) {
+#if DEBUG_SERIAL
+  Serial.printf("Vendor interface mounted: addr=%u inst=%u\n", dev_addr, instance);
+  
+  uint16_t vid, pid;
+  if (tuh_vid_pid_get(dev_addr, &vid, &pid)) {
+    Serial.printf("  VID:0x%04X PID:0x%04X\n", vid, pid);
+    if (vid == 0x057E && pid == 0x2069) {
+      Serial.println("  This is Pro 2 vendor interface (Interface 1)");
+      Serial.println("  Bulk endpoint should be available now - sending handshake...");
+      
+      // Send Pro 2 handshake via vendor interface
+      delay(100);  // Let interface settle
+      sendPro2Handshake(dev_addr, instance);
+    }
+  }
+#endif
+  (void)desc_itf;
+  (void)desc_len;
+}
+
+void tuh_vendor_umount_cb(uint8_t dev_addr, uint8_t instance) {
+#if DEBUG_SERIAL
+  Serial.printf("Vendor interface unmounted: addr=%u inst=%u\n", dev_addr, instance);
+#endif
+  (void)dev_addr;
+  (void)instance;
+}
+
 // Called when any device is mounted (not just HID)
 void tuh_mount_cb(uint8_t dev_addr) {
-#if DEBUG_SERIAL
   uint16_t vid, pid;
   tuh_vid_pid_get(dev_addr, &vid, &pid);
-  Serial.printf("\n>>> Device Connected [VID:%04X PID:%04X]\n", vid, pid);
+  
+#if DEBUG_SERIAL
+  Serial.printf("\n>>> Device Connected [Addr:%u VID:%04X PID:%04X]\n", dev_addr, vid, pid);
+  
+  // Get device descriptor info
+  Serial.printf("    Device Class: 0x%02X\n", tuh_descriptor_get_device(dev_addr)->bDeviceClass);
+  Serial.printf("    Num Configurations: %u\n", tuh_descriptor_get_device(dev_addr)->bNumConfigurations);
 #endif
   
   // Check for HID interfaces and start receiving reports
   uint8_t hid_count = tuh_hid_instance_count(dev_addr);
+  
+#if DEBUG_SERIAL
+  Serial.printf("    HID interface count: %u\n", hid_count);
+#endif
+  
+  if (hid_count == 0) {
+#if DEBUG_SERIAL
+    Serial.println("    WARNING: No HID interfaces found!");
+    Serial.println("    This might be a Pro 2 controller - it has vendor-specific interface");
+    Serial.println("    Check if device has multiple interfaces that need manual enumeration");
+#endif
+  }
+  
   for (uint8_t idx = 0; idx < hid_count; idx++) {
 #if DEBUG_SERIAL
     uint8_t const itf_protocol = tuh_hid_interface_protocol(dev_addr, idx);
     const char* protocol_str[] = { "Generic", "Keyboard", "Mouse" };
     if (itf_protocol <= 2) {
-      Serial.printf("    HID %s detected\n", protocol_str[itf_protocol]);
+      Serial.printf("    HID %s detected (instance %u)\n", protocol_str[itf_protocol], idx);
     }
 #endif
     tuh_hid_receive_report(dev_addr, idx);

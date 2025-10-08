@@ -80,6 +80,36 @@ inline bool isNintendoController(uint8_t dev_addr) {
   return false;
 }
 
+// Callback for bulk transfer completion
+static void pro2_bulk_xfer_cb(tuh_xfer_t* xfer) {
+  if (xfer->result == XFER_RESULT_SUCCESS) {
+#if DEBUG_SERIAL
+    Serial.printf("Pro 2 bulk transfer success: %u bytes\n", xfer->actual_len);
+#endif
+  } else {
+#if DEBUG_SERIAL
+    Serial.printf("Pro 2 bulk transfer failed: result=%d\n", xfer->result);
+#endif
+  }
+}
+
+// Send single command via USB bulk OUT endpoint 0x01
+inline bool sendPro2Command(uint8_t dev_addr, const uint8_t* cmd, uint16_t len) {
+  // Pro 2 uses bulk OUT endpoint 0x01 (not HID interface)
+  // This is "outside of the standard HID stuff" as ndeadly mentioned
+  
+  tuh_xfer_t xfer = {
+    .daddr = dev_addr,
+    .ep_addr = 0x01,  // Bulk OUT endpoint
+    .buflen = len,
+    .buffer = (uint8_t*)cmd,
+    .complete_cb = pro2_bulk_xfer_cb,
+    .user_data = 0
+  };
+  
+  return tuh_edpt_xfer(&xfer);
+}
+
 // Send handshake commands to Pro 2 controller via bulk endpoint
 inline bool sendPro2Handshake(uint8_t dev_addr, uint8_t instance) {
   if (instance >= 4) return false;
@@ -106,28 +136,26 @@ inline bool sendPro2Handshake(uint8_t dev_addr, uint8_t instance) {
     return state->handshake_complete;
   }
   
-  // Pro 2 uses USB bulk OUT endpoint (EP 0x01) for commands
+  // Pro 2 uses USB bulk OUT endpoint 0x01 for commands (not HID)
+  // These commands are "outside of the standard HID stuff"
   // Send initialization sequence: 0x03, 0x07, 0x15
   
 #if DEBUG_SERIAL
-  Serial.printf("Sending Pro 2 init sequence to addr=%u inst=%u\n", dev_addr, instance);
+  Serial.printf("Sending Pro 2 init via bulk EP 0x01 to addr=%u\n", dev_addr);
 #endif
   
   // Command 0x03 - Start HID output at 4ms intervals
-  bool success = tuh_hid_send_report(dev_addr, instance, 0, 
-                                      (void*)INIT_CMD_0x03, sizeof(INIT_CMD_0x03));
+  bool success = sendPro2Command(dev_addr, INIT_CMD_0x03, sizeof(INIT_CMD_0x03));
   
   if (success) {
-    delay(10);  // Small delay between commands
+    delay(20);  // Delay between commands
     
     // Command 0x07 - Unknown but required
-    success = tuh_hid_send_report(dev_addr, instance, 0,
-                                   (void*)INIT_CMD_0x07, sizeof(INIT_CMD_0x07));
-    delay(10);
+    success = sendPro2Command(dev_addr, INIT_CMD_0x07, sizeof(INIT_CMD_0x07));
+    delay(20);
     
     // Command 0x15 - Request controller MAC
-    success = tuh_hid_send_report(dev_addr, instance, 0,
-                                   (void*)INIT_CMD_0x15_01, sizeof(INIT_CMD_0x15_01));
+    success = sendPro2Command(dev_addr, INIT_CMD_0x15_01, sizeof(INIT_CMD_0x15_01));
   }
   
   if (success) {
@@ -135,11 +163,11 @@ inline bool sendPro2Handshake(uint8_t dev_addr, uint8_t instance) {
     state->handshake_time = millis();
     
 #if DEBUG_SERIAL
-    Serial.println("Pro 2 init sequence sent successfully");
+    Serial.println("Pro 2 init sequence queued successfully");
 #endif
   } else {
 #if DEBUG_SERIAL
-    Serial.println("Pro 2 init sequence FAILED");
+    Serial.println("Pro 2 init sequence FAILED - bulk endpoint not available?");
 #endif
   }
   
