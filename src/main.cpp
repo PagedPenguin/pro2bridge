@@ -131,10 +131,6 @@ void tuh_mount_cb(uint8_t dev_addr) {
   
 #if DEBUG_SERIAL
   Serial.printf("\n>>> Device Connected [Addr:%u VID:%04X PID:%04X]\n", dev_addr, vid, pid);
-  
-  // Get device descriptor info
-  Serial.printf("    Device Class: 0x%02X\n", tuh_descriptor_get_device(dev_addr)->bDeviceClass);
-  Serial.printf("    Num Configurations: %u\n", tuh_descriptor_get_device(dev_addr)->bNumConfigurations);
 #endif
   
   // Check for HID interfaces and start receiving reports
